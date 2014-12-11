@@ -6,14 +6,14 @@ export(
   "bfastpp",
   "bfastts",
   "bfast01",
-  "bfast01classify"
+  "bfast01classify",
   "bfaarray2",
   "bfaarray",
   "tasd.bfa.mul",
   "timeasdimbfa",
   "timeasdim",
   "monthofyears",
-  "dayofyears",
+  "dayofyears"
 )
 
 S3method("plot", "bfast")
