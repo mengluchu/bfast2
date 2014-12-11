@@ -47,8 +47,13 @@ tasd.bfa.mul<-function(newarr,timearr,variablearr)
       
       if ( nb >=1)
       {
+        
         for(i in 1:nb)
-          newarr[x,y,timearr[i,x,y]]<- variablearr[i,x,y]   
+        {
+          if(timearr[i,x,y]!=0)
+            newarr[x,y,timearr[i,x,y]]<- variablearr[i,x,y]   
+          
+        }   
       }
     }
   }
