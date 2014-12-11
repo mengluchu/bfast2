@@ -7,6 +7,13 @@ export(
   "bfastts",
   "bfast01",
   "bfast01classify"
+  "bfaarray2",
+  "bfaarray",
+  "tasd.bfa.mul",
+  "timeasdimbfa",
+  "timeasdim",
+  "monthofyears",
+  "dayofyears",
 )
 
 S3method("plot", "bfast")
