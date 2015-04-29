@@ -1,4 +1,4 @@
-import("graphics", "stats", "strucchange", "zoo", "raster", "sp", "forecast")
+import("graphics", "stats", "strucchange", "zoo", "raster", "sp", "forecast","spdep")
 
 export(
   "bfast",
@@ -14,6 +14,7 @@ export(
   "timeasdim",
   "monthofyears",
   "dayofyears"
+  "bfastsarts"
 )
 
 S3method("plot", "bfast")
