@@ -1,6 +1,7 @@
 import("graphics", "stats", "strucchange", "zoo", "raster", "sp", "forecast","spdep")
 
 export(
+  "bfaarray2",
   "bfast",
   "bfastmonitor",
   "bfastpp",
