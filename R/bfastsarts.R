@@ -1,5 +1,4 @@
-#i=1
-#starr<-fevi8[i:(i+2),j:(j+2),]
+
 bfastsar <- function(starr,  h=0.15 , season =c("dummy","harmonic","none"), max.iter = 3, breaks = NULL, hpc = "none", level = 0.05, type= "OLS-MOSUM")
 {
   require('spdep')
@@ -192,5 +191,7 @@ bfastsar <- function(starr,  h=0.15 , season =c("dummy","harmonic","none"), max.
   return(structure(list(Yt=Yt,output=output,nobp=list(Vt=nobp.Vt,Wt=nobp.Wt),Magnitude=Magnitude,Mags=Mag,
                         Time=Time,jump=list(x=ti[m.x],y=m.y)),class="bfast"))  
 }
-
-# bfastsar(starr,season='harmonic', max.iter = 3)
+#i=1
+#starr<-fevi8[i:(i+2),j:(j+2),]
+#
+#bfastsar(starr,season='harmonic', max.iter = 3)
