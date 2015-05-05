@@ -7,7 +7,7 @@ export(
   "bfastpp",
   "bfast01",
   "bfast01classify",
-  "bfastsar",
+  "bfastsar"
 )
 
 S3method("plot", "bfast")
