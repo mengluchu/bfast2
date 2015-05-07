@@ -84,7 +84,7 @@ bfastsar <- function(starr, LE=636, h=0.15 , season =c("dummy","harmonic","none"
     fevi3b312t<-apply(starr,c(1,2),function(x) (ts(x,start=c(2000,1),frequency=46)-St))
     f2<-aperm(fevi3b312t,c(2,3,1))  
     aa2<-as.vector(f2) 
-    try2<-spautolm(aa2~. , data.frame(aa2,X),family="SAR",method= "Matrix", listw=listcnle)   
+    try2<-spautolm(aa2~. , data.frame(aa2,X),family="SAR",method= "Matrix", listw=listcn636)   
     rn<-lapply(1:9,function(i) {residuals(try2)[seq(i,le*9-(9-i),9)]})
     Vt<-ts(f2[2,2,],start=c(2000,1),frequency=46) # reconstruct the time series
     
