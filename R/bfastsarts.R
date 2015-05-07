@@ -1,8 +1,8 @@
 
-bfastsar <- function(starr,  h=0.15 , season =c("dummy","harmonic","none"), max.iter = 3, breaks = NULL, hpc = "none", level = 0.05, type= "OLS-MOSUM")
+bfastsar <- function(starr, LE=636, h=0.15 , season =c("dummy","harmonic","none"), max.iter = 3, breaks = NULL, hpc = "none", level = 0.05, type= "OLS-MOSUM")
 {
   require('spdep')
-  le=636
+  le=LE
   tl=1:le
   w=1/46
   #harmonic
@@ -13,19 +13,19 @@ bfastsar <- function(starr,  h=0.15 , season =c("dummy","harmonic","none"), max.
   co2 <- cos(2*pi*tl*w*2);si2 <- sin(2*pi*tl*w*2)  
   co3 <- cos(2*pi*tl*w*3);si3 <- sin(2*pi*tl*w*3) 
   
-  X = matrix(0, 636 * 9, 9*8)
+  X = matrix(0, le * 9, 9*8)
   
   for( i in 1:9)
   {
     
-    X[seq(i,by=9,length.out=636),1+(i-1)*8] = 1 
-    X [seq(i,by=9,length.out=636),2+(i-1)*8] = tl 
-    X[seq(i,by=9,length.out=636),3+(i-1)*8] =co
-    X[seq(i,by=9,length.out=636),4+(i-1)*8] =co2
-    X[seq(i,by=9,length.out=636),5+(i-1)*8] =co3
-    X[seq(i,by=9,length.out=636),6+(i-1)*8] =si
-    X[seq(i,by=9,length.out=636),7+(i-1)*8] =si2
-    X[seq(i,by=9,length.out=636),8+(i-1)*8] =si3
+    X[seq(i,by=9,length.out=le),1+(i-1)*8] = 1 
+    X [seq(i,by=9,length.out=le),2+(i-1)*8] = tl 
+    X[seq(i,by=9,length.out=le),3+(i-1)*8] =co
+    X[seq(i,by=9,length.out=le),4+(i-1)*8] =co2
+    X[seq(i,by=9,length.out=le),5+(i-1)*8] =co3
+    X[seq(i,by=9,length.out=le),6+(i-1)*8] =si
+    X[seq(i,by=9,length.out=le),7+(i-1)*8] =si2
+    X[seq(i,by=9,length.out=le),8+(i-1)*8] =si3
   }
   
   
@@ -84,8 +84,8 @@ bfastsar <- function(starr,  h=0.15 , season =c("dummy","harmonic","none"), max.
     fevi3b312t<-apply(starr,c(1,2),function(x) (ts(x,start=c(2000,1),frequency=46)-St))
     f2<-aperm(fevi3b312t,c(2,3,1))  
     aa2<-as.vector(f2) 
-    try2<-spautolm(aa2~. , data.frame(aa2,X),family="SAR",method= "Matrix", listw=listcn636)   
-    rn<-lapply(1:9,function(i) {residuals(try2)[seq(i,636*9-(9-i),9)]})
+    try2<-spautolm(aa2~. , data.frame(aa2,X),family="SAR",method= "Matrix", listw=listcnle)   
+    rn<-lapply(1:9,function(i) {residuals(try2)[seq(i,le*9-(9-i),9)]})
     Vt<-ts(f2[2,2,],start=c(2000,1),frequency=46) # reconstruct the time series
     
     
