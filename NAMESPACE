@@ -2,6 +2,14 @@ import("graphics", "stats", "strucchange", "zoo", "raster", "sp", "forecast","sp
 
 export(
   "bfaarray2",
+  "bfaarray",
+  "bfastmore",
+  "bfaclass",
+  "timeasdimbfa",
+  "timeasdim",
+  "tasd.bfa.mul",
+  "monthofyears",
+  "dayofyears",
   "bfast",
   "bfastmonitor",
   "bfastpp",
