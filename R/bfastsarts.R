@@ -70,6 +70,17 @@ bfastsar <- function(starr, LE=636, h=0.15 , season =c("dummy","harmonic","none"
   } else stop("Not a correct seasonal model is selected ('harmonic' or 'dummy') ")
   
   # number/timing of structural breaks in the trend/seasonal component
+    fevi3b312t<-apply(starr,c(1,2),function(x) (ts(x,start=c(2000,1),frequency=46)-St))
+    f2<-aperm(fevi3b312t,c(2,3,1))  
+    aa2<-as.vector(f2) 
+    try2<-spautolm(aa2~. , data.frame(aa2,X),family="SAR",method= "Matrix", listw=listcn636)   
+    rn<-lapply(1:9,function(i) {residuals(try2)[seq(i,le*9-(9-i),9)]})
+    Vt<-ts(f2[2,2,],start=c(2000,1),frequency=46) # reconstruct the time series
+    
+    
+    p.Vt <- sctest(efp(Vt ~ ti, h=h, type=type,spatial1=rn[[5]]))
+  
+  
   Vt.bp <- 0
   Wt.bp <- 0 
   CheckTimeTt <- 1
@@ -81,15 +92,7 @@ bfastsar <- function(starr, LE=636, h=0.15 , season =c("dummy","harmonic","none"
     CheckTimeSt <- Wt.bp
     # TREND
     # Vt <- Yt-St
-    fevi3b312t<-apply(starr,c(1,2),function(x) (ts(x,start=c(2000,1),frequency=46)-St))
-    f2<-aperm(fevi3b312t,c(2,3,1))  
-    aa2<-as.vector(f2) 
-    try2<-spautolm(aa2~. , data.frame(aa2,X),family="SAR",method= "Matrix", listw=listcn636)   
-    rn<-lapply(1:9,function(i) {residuals(try2)[seq(i,le*9-(9-i),9)]})
-    Vt<-ts(f2[2,2,],start=c(2000,1),frequency=46) # reconstruct the time series
-    
-    
-    p.Vt <- sctest(efp(Vt ~ ti, h=h, type=type,spatial1=rn[[1]]))
+  
     
     if (p.Vt$p.value <= level[1]) 
     {
