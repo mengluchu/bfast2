@@ -2,6 +2,7 @@ bfastmore<-function (Yt, h = 0.15, season = c("dummy", "harmonic", "none"),
                      max.iter = NULL, breaks = NULL, hpc = "none", level = 0.05, 
                      type = "OLS-MOSUM") 
 {
+  require(strucchange)
   season <- match.arg(season)
   level = rep(level, length.out = 2)
   ti <- time(Yt)
@@ -155,11 +156,14 @@ bfaclass<-function(fit)
   
   out <- rep(NA, nbp)
   
-  
-  if(ttrend == 0) {     
+
+  if(ttrend[1] == 0) {     
+    for(r in 1:nbp)
+    {
     slope <- co[2]# slope
-    if(slope > 0) out[1] <- 1
-    if(slope < 0) out[1] <- 2
+    if(slope > 0) out[r] <- 1
+    if(slope < 0) out[r] <- 2
+    }
   } else {
     ## if break, list segment and break point parameters (p$..)
     ToB <- as.numeric(ttrend)  # time of break
