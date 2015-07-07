@@ -16,7 +16,7 @@
 ##150by 150 # coordinate of MODIS array
 #x<-c(58930:59079)
 #y<-c(48210:48359)
-
+#load("edivisive1.Rdata")
 ##### MODIS array index to MODIS SINUSOIDAL coordinates ##############
 getxyMatrix <- function(colrowid.Matrix, pixelSize,crs=CRS("+proj=utm +zone=21 +south")){
   
@@ -31,7 +31,7 @@ getxyMatrix <- function(colrowid.Matrix, pixelSize,crs=CRS("+proj=utm +zone=21 +
 
 
 ####### array of changepoints to spatial points  ############
-changepoint2sp<- function(changearray,x=c(58930:59079),y=c(48210:48359)) # map the changes from the array that stores the changes. multiple changes are mapped as one change point
+changepoint2sp<- function(changearray,x=c(58930:59079),y=c(48210:48359),crs=NULL) # map the changes from the array that stores the changes. multiple changes are mapped as one change point
 {  
   change7<-which(!is.na(changearray ),arr.ind=TRUE) #0.05
   
@@ -51,8 +51,8 @@ changepoint2sp<- function(changearray,x=c(58930:59079),y=c(48210:48359)) # map t
   spmodist51<-SpatialPoints(coordinates(changeinmot0.5.1))
   proj4string(spmodist51)<-'+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'
   if(!is.null(crs))
-    modis.mt52<-spTransform(spmodist51,crs)
-  return(modis.mt52)
+    spmodist51<-spTransform(spmodist51,crs)
+  return(spmodist51)
 } 
 #example: spfevi8<-bfastchangepoint(fevi8[,,1],x,y)
 
@@ -140,9 +140,9 @@ gcm<-function(changepoint, reference.sppoint=pdd,totalp=19167){
 
 ### generate confusion matrix from result array, can use a mask to mask only interest area (sppoints) and set p-value#######
 
-generatecmchange<-function( result.array,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359)) #  put functions together and generate confusion matrix (filtered with a mask)
+generatecmchange<-function( result.array,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359),crs=CRS("+proj=utm +zone=21 +south")) #  put functions together and generate confusion matrix (filtered with a mask)
 {
-  pvpoint<- changepoint2sp(result.array,x,y )
+  pvpoint<- changepoint2sp(result.array,x,y,crs=crs )
   if(!is.null(mask))
     pvpoint<-pvpoint[mask,]
   showre<-gcm(pvpoint,reference.sppoints)
@@ -167,6 +167,18 @@ generateppvalue<-function(result.array=pvaluemx ,reference.sppoints=pdd,mask=pro
   return(pvpoint)
 }
 
+generatepchange<-function( result.array,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359),crs=CRS("+proj=utm +zone=21 +south")) #  put functions together and generate confusion matrix (filtered with a mask)
+{
+  pvpoint<- changepoint2sp(result.array,x,y,crs=crs )
+  if(!is.null(mask))
+    pvpoint<-pvpoint[mask,]
+ 
+  return(pvpoint)
+}
+
+#generatecmchange(edivisive1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359))
+#cp<-generatepchange(edivisive1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359))
+#
 ### do things
 #ptssarar1<-generateppvalue(tssarar1,pv=0.05)
 #ptssarar11<-generateppvalue(tssarar1,pv=0.005)
@@ -176,7 +188,7 @@ generateppvalue<-function(result.array=pvaluemx ,reference.sppoints=pdd,mask=pro
 #ptssarar4<-generateppvalue(tssarar4,pv=0.05)
 #ptssarar5<-generateppvalue(tssarar5,pv=0.05)
 #ptssarar6<-generateppvalue(tssarar6,pv=0.05)
-
+ 
 #ttssarar1<-generatecmpvalue(tssarar1,pdd,pv=0.05)
 #ttssarar11<-generatecmpvalue(result.array=tssarar1 ,pv=0.2)
 #ttssarar2<-generatecmpvalue(tssarar2,pdd,pv=0.05)
