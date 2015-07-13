@@ -1,9 +1,9 @@
 #library('rgdal')
 #library('raster')
 
-#load('prodespoints00.Rdata') # mask
-#load('pdd.Rdata')           # reference data
-#groundtruth<-pdd            
+load('prodespoints00.Rdata') # mask
+load('pdd.Rdata')           # reference data
+groundtruth<-pdd            
 #load('tssarar1.Rdata') # corrected st model with original array cusum
 #load('tssarar2.Rdata')#mosum
 #load('tssarar3.Rdata')#sar cusum
@@ -31,7 +31,7 @@ getxyMatrix <- function(colrowid.Matrix, pixelSize,crs=CRS("+proj=utm +zone=21 +
 
 
 ####### array of changepoints to spatial points  ############
-changepoint2sp<- function(changearray,x=c(58930:59079),y=c(48210:48359),crs=NULL) # map the changes from the array that stores the changes. multiple changes are mapped as one change point
+changepoint2sp<- function(changearray,x=c(58930:59079),y=c(48210:48359),crs=CRS("+proj=utm +zone=21 +south")) # map the changes from the array that stores the changes. multiple changes are mapped as one change point
 {  
   change7<-which(!is.na(changearray ),arr.ind=TRUE) #0.05
   
@@ -176,8 +176,11 @@ generatepchange<-function( result.array,mask=prodespoints00,reference.sppoints=p
   return(pvpoint)
 }
 
-#generatecmchange(edivisive1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359))
-#cp<-generatepchange(edivisive1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359))
+load('prodespoints00.Rdata') # mask
+ load('pdd.Rdata')
+ groundtruth<-pdd
+cpe<- generatepchange(edivisive1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359),crs= CRS("+proj=utm +zone=21 +south"))
+cpb<-generatepchange(bfast1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359),crs= CRS("+proj=utm +zone=21 +south"))
 #
 ### do things
 #ptssarar1<-generateppvalue(tssarar1,pv=0.05)
@@ -222,3 +225,285 @@ generatepchange<-function( result.array,mask=prodespoints00,reference.sppoints=p
         #legend.text=c("MOSUM","CUSUM","SAR MOSUM 0.05", "SAR MOSUM 0.025","SAR CUSUM 0.05","SAR CUSUM 0.005"),
         #args.legend = list(x = "topleft", bty = "n",cex=0.6)) 
 #)
+generatemapRAS1(cpe,groundtruth,prodespoints00)
+generatemapRAS1(cpb,groundtruth,prodespoints00)
+generatemapRAS1<-function (pva, groundtruth=groundtruth,prodespoints00=prodespoints00 ) {
+groundtruth<-spTransform(groundtruth,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+prodespoints00<-spTransform(prodespoints00,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+pva<-spTransform(pva,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+
+FP<-pva[which(is.na(over(pva,groundtruth)))]
+FN<-groundtruth[which(is.na(over(groundtruth,pva)))]
+TP<-pva[groundtruth,]
+PRODESNE<-prodespoints00[ which(is.na(over(prodespoints00,groundtruth))),]
+BFASTNE<-prodespoints00[ which(is.na(over(prodespoints00,pva))),]
+TN<-PRODESNE[BFASTNE,]
+
+TPV<-rep(1,length(data.frame(TP)[,1]))
+TNV<-rep(2,length(data.frame(TN)[,1]))
+FPV<-rep(3,length(data.frame(FP)[,1]))
+FNV<-rep(4,length(data.frame(FN)[,1]))
+#plot(raster(TPdf))
+TPdf<-SpatialPointsDataFrame( coordinates(data.frame(TP)),data=data.frame(TPV))
+TNdf<-SpatialPointsDataFrame( coordinates(data.frame(TN)),data=data.frame(TNV))
+FPdf<-SpatialPointsDataFrame( coordinates(data.frame(FP)),data=data.frame(FPV))
+FNdf<-SpatialPointsDataFrame( coordinates(data.frame(FN)),data=data.frame(FNV))
+a<-data.frame(TPdf)
+b<-data.frame(FPdf)
+c<-data.frame(FNdf)
+d<-data.frame(TNdf)
+
+names(c)<-names(a)
+names(b)<-names(a)
+names(d)<-names(a)
+abcd<-rbind(a,b,c,d)
+
+coordinates(abcd)<-~x+y
+gridded(abcd)<-TRUE
+
+r1<-raster(abcd)
+
+raty = ratify(r1)
+rat <- levels(raty)[[1]]
+rat$class <- c('True Positive', 'True Negative', 'False Positive', 'False Negative')
+levels(raty) <- rat
+cols = ccols = c("#ffff99", "#7fc97f", "#1f78b4", "#fdc086")
+ty<-levelplot(raty,col.regions =cols,names.attr=c("edivisive"))
+
+plot(ty)
+}
+generateRAS<-function (pva , groundtruth=groundtruth,prodespoints00=prodespoints00 ) {
+  groundtruth<-spTransform(groundtruth,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  prodespoints00<-spTransform(prodespoints00,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  pva<-spTransform(pva,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  
+  FP<-pva[which(is.na(over(pva,groundtruth)))]
+  FN<-groundtruth[which(is.na(over(groundtruth,pva)))]
+  TP<-pva[groundtruth,]
+  PRODESNE<-prodespoints00[ which(is.na(over(prodespoints00,groundtruth))),]
+  BFASTNE<-prodespoints00[ which(is.na(over(prodespoints00,pva))),]
+  TN<-PRODESNE[BFASTNE,]
+  
+  TPV<-rep(1,length(data.frame(TP)[,1]))
+  TNV<-rep(2,length(data.frame(TN)[,1]))
+  FPV<-rep(3,length(data.frame(FP)[,1]))
+  FNV<-rep(4,length(data.frame(FN)[,1]))
+  #plot(raster(TPdf))
+  TPdf<-SpatialPointsDataFrame( coordinates(data.frame(TP)),data=data.frame(TPV))
+  TNdf<-SpatialPointsDataFrame( coordinates(data.frame(TN)),data=data.frame(TNV))
+  FPdf<-SpatialPointsDataFrame( coordinates(data.frame(FP)),data=data.frame(FPV))
+  FNdf<-SpatialPointsDataFrame( coordinates(data.frame(FN)),data=data.frame(FNV))
+  a<-data.frame(TPdf)
+  b<-data.frame(FPdf)
+  c<-data.frame(FNdf)
+  d<-data.frame(TNdf)
+  
+  names(c)<-names(a)
+  names(b)<-names(a)
+  names(d)<-names(a)
+  abcd<-rbind(a,b,c,d)
+  
+  coordinates(abcd)<-~x+y
+  gridded(abcd)<-TRUE
+  
+  r1<-raster(abcd)
+  
+  raty = ratify(r1)
+  rat <- levels(raty)[[1]]
+  rat$class <- c('True Positive', 'True Negative', 'False Positive', 'False Negative')
+  levels(raty) <- rat
+  return(raty)
+
+}
+r1<-generateRAS(pva=cpe,groundtruth,prodespoints00)
+rb<-generateRAS(pva=cpb,groundtruth,prodespoints00)
+rasterStack1 = stack(r1, rb)
+names(rasterStack1) = c("e.divisive", "BFAST" )
+
+l<- levelplot(rasterStack1
+              , pretty=TRUE, margin=F
+              , xlab="Latitude (Sinusoidal Projection)", ylab="Longitude (Sinusoidal Projection)",
+              col.regions=cols,names.attr=c("e.divisive(monthly)", "BFAST (monthly)" ))
+plot(l)
+generatemapGGRASTER<-function (pva1,pva2,pva3,pva4, groundtruth,titlename='map') 
+{
+  pva<-pva1
+  groundtruth<-spTransform(groundtruth,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  prodespoints00<-spTransform(prodespoints00,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  pva<-spTransform(pva,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  
+  FP<-pva[which(is.na(over(pva,groundtruth)))]
+  FN<-groundtruth[which(is.na(over(groundtruth,pva)))]
+  TP<-pva[groundtruth,]
+  PRODESNE<-prodespoints00[ which(is.na(over(prodespoints00,groundtruth))),]
+  BFASTNE<-prodespoints00[ which(is.na(over(prodespoints00,pva))),]
+  TN<-PRODESNE[BFASTNE,]
+  
+  TPV<-rep(1,length(data.frame(TP)[,1]))
+  TNV<-rep(2,length(data.frame(TN)[,1]))
+  FPV<-rep(3,length(data.frame(FP)[,1]))
+  FNV<-rep(4,length(data.frame(FN)[,1]))
+  #plot(raster(TPdf))
+  TPdf<-SpatialPointsDataFrame( coordinates(data.frame(TP)),data=data.frame(TPV))
+  TNdf<-SpatialPointsDataFrame( coordinates(data.frame(TN)),data=data.frame(TNV))
+  FPdf<-SpatialPointsDataFrame( coordinates(data.frame(FP)),data=data.frame(FPV))
+  FNdf<-SpatialPointsDataFrame( coordinates(data.frame(FN)),data=data.frame(FNV))
+  a<-data.frame(TPdf)
+  b<-data.frame(FPdf)
+  c<-data.frame(FNdf)
+  d<-data.frame(TNdf)
+  
+  names(c)<-names(a)
+  names(b)<-names(a)
+  names(d)<-names(a)
+  abcd<-rbind(a,b,c,d)
+  
+  coordinates(abcd)<-~x+y
+  gridded(abcd)<-TRUE
+  
+  r1<-raster(abcd)
+  gg1<- gplot(r1)+ geom_tile(aes(fill = factor(value))) +
+    scale_fill_manual(values=c("2"="seagreen4", "3"="palegoldenrod", "4"="skyblue", "1"="palevioletred1"), 
+                      na.value="white",
+                      name="CONFUSION MATRIX",  
+                      breaks=c("2","3","4","1"),         
+                      labels=c("TRUE NEGATIVE", "FALSE POSITIVE", "FALSE NEGATIVE","TRUE POSITIVE"))+
+    coord_equal()+ 
+    ggtitle("OLS-CUSUM")+    theme(legend.position = "none")
+  
+  ############
+  pva<-pva2
+  groundtruth<-spTransform(groundtruth,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  prodespoints00<-spTransform(prodespoints00,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  pva<-spTransform(pva,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  FP<-pva[which(is.na(over(pva,groundtruth)))]
+  FN<-groundtruth[which(is.na(over(groundtruth,pva)))]
+  TP<-pva[groundtruth,]
+  PRODESNE<-prodespoints00[ which(is.na(over(prodespoints00,groundtruth))),]
+  BFASTNE<-prodespoints00[ which(is.na(over(prodespoints00,pva))),]
+  TN<-PRODESNE[BFASTNE,]
+  
+  TPV<-rep(1,length(data.frame(TP)[,1]))
+  TNV<-rep(2,length(data.frame(TN)[,1]))
+  FPV<-rep(3,length(data.frame(FP)[,1]))
+  FNV<-rep(4,length(data.frame(FN)[,1]))
+  #plot(raster(TPdf))
+  TPdf<-SpatialPointsDataFrame( coordinates(data.frame(TP)),data=data.frame(TPV))
+  TNdf<-SpatialPointsDataFrame( coordinates(data.frame(TN)),data=data.frame(TNV))
+  FPdf<-SpatialPointsDataFrame( coordinates(data.frame(FP)),data=data.frame(FPV))
+  FNdf<-SpatialPointsDataFrame( coordinates(data.frame(FN)),data=data.frame(FNV))
+  a<-data.frame(TPdf)
+  b<-data.frame(FPdf)
+  c<-data.frame(FNdf)
+  d<-data.frame(TNdf)
+  
+  names(c)<-names(a)
+  names(b)<-names(a)
+  names(d)<-names(a)
+  abcd<-rbind(a,b,c,d)
+  
+  coordinates(abcd)<-~x+y
+  gridded(abcd)<-TRUE
+  
+  r2<-raster(abcd)
+  gg2<-gplot(r2)+ geom_tile(aes(fill = factor(value))) +
+    scale_fill_manual(values=c("2"="seagreen4", "3"="palegoldenrod", "4"="skyblue", "1"="palevioletred1"), 
+                      na.value="white",
+                      name="CONFUSION MATRIX",  
+                      breaks=c("1","2","3","4"),         
+                      labels=c("TRUE NEGATIVE", "FALSE POSITIVE", "FALSE NEGATIVE","TRUE POSITIVE"))+
+    coord_equal()+ 
+    ggtitle("OLS-MOSUM")+    theme(legend.position = "none")
+  
+  
+  ############
+  pva<-pva3
+  
+  pva<-spTransform(pva,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  
+  FP<-pva[which(is.na(over(pva,groundtruth)))]
+  FN<-groundtruth[which(is.na(over(groundtruth,pva)))]
+  TP<-pva[groundtruth,]
+  PRODESNE<-prodespoints00[ which(is.na(over(prodespoints00,groundtruth))),]
+  BFASTNE<-prodespoints00[ which(is.na(over(prodespoints00,pva))),]
+  TN<-PRODESNE[BFASTNE,]
+  
+  TPV<-rep(1,length(data.frame(TP)[,1]))
+  TNV<-rep(2,length(data.frame(TN)[,1]))
+  FPV<-rep(3,length(data.frame(FP)[,1]))
+  FNV<-rep(4,length(data.frame(FN)[,1]))
+  #plot(raster(TPdf))
+  TPdf<-SpatialPointsDataFrame( coordinates(data.frame(TP)),data=data.frame(TPV))
+  TNdf<-SpatialPointsDataFrame( coordinates(data.frame(TN)),data=data.frame(TNV))
+  FPdf<-SpatialPointsDataFrame( coordinates(data.frame(FP)),data=data.frame(FPV))
+  FNdf<-SpatialPointsDataFrame( coordinates(data.frame(FN)),data=data.frame(FNV))
+  a<-data.frame(TPdf)
+  b<-data.frame(FPdf)
+  c<-data.frame(FNdf)
+  d<-data.frame(TNdf)
+  
+  names(c)<-names(a)
+  names(b)<-names(a)
+  names(d)<-names(a)
+  abcd<-rbind(a,b,c,d)
+  
+  coordinates(abcd)<-~x+y
+  gridded(abcd)<-TRUE
+  
+  r3<-raster(abcd)
+  gg3<- gplot(r3)+ geom_tile(aes(fill = factor(value))) +
+    scale_fill_manual(values=c("2"="seagreen4", "3"="palegoldenrod", "4"="skyblue", "1"="palevioletred1"), 
+                      na.value="white",
+                      name="CONFUSION MATRIX",  
+                      breaks=c("1","2","3","4"),         
+                      labels=c("TRUE NEGATIVE", "FALSE POSITIVE", "FALSE NEGATIVE","TRUE POSITIVE"))+
+    coord_equal()+ 
+    ggtitle("SAR OLS-CUSUM")+    theme(legend.position = "none")
+  
+  
+  #############
+  pva<-pva4
+  
+  pva<-spTransform(pva,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
+  
+  FP<-pva[which(is.na(over(pva,groundtruth)))]
+  FN<-groundtruth[which(is.na(over(groundtruth,pva)))]
+  TP<-pva[groundtruth,]
+  PRODESNE<-prodespoints00[ which(is.na(over(prodespoints00,groundtruth))),]
+  BFASTNE<-prodespoints00[ which(is.na(over(prodespoints00,pva))),]
+  TN<-PRODESNE[BFASTNE,]
+  
+  TPV<-rep(1,length(data.frame(TP)[,1]))
+  TNV<-rep(2,length(data.frame(TN)[,1]))
+  FPV<-rep(3,length(data.frame(FP)[,1]))
+  FNV<-rep(4,length(data.frame(FN)[,1]))
+  #plot(raster(TPdf))
+  TPdf<-SpatialPointsDataFrame( coordinates(data.frame(TP)),data=data.frame(TPV))
+  TNdf<-SpatialPointsDataFrame( coordinates(data.frame(TN)),data=data.frame(TNV))
+  FPdf<-SpatialPointsDataFrame( coordinates(data.frame(FP)),data=data.frame(FPV))
+  FNdf<-SpatialPointsDataFrame( coordinates(data.frame(FN)),data=data.frame(FNV))
+  a<-data.frame(TPdf)
+  b<-data.frame(FPdf)
+  c<-data.frame(FNdf)
+  d<-data.frame(TNdf)
+  
+  names(c)<-names(a)
+  names(b)<-names(a)
+  names(d)<-names(a)
+  abcd<-rbind(a,b,c,d)
+  
+  coordinates(abcd)<-~x+y
+  gridded(abcd)<-TRUE
+  
+  r4<-raster(abcd)
+  gg4<-gplot(r4)+ geom_tile(aes(fill = factor(value))) +
+    scale_fill_manual(values=c("2"="seagreen4", "3"="palegoldenrod", "4"="skyblue", "1"="palevioletred1"), 
+                      na.value="white",
+                      name="CONFUSION MATRIX",  
+                      breaks=c("1","2","3","4"),         
+                      labels=c("TRUE NEGATIVE", "FALSE POSITIVE", "FALSE NEGATIVE","TRUE POSITIVE"))+
+    coord_equal()+ 
+    ggtitle("SAR OLS-MOSUM")+    theme(legend.position = "none")
+  
+  grid_arrange_shared_legend(gg1,gg2,gg3,gg4)
+}
