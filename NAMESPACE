@@ -15,7 +15,7 @@ export(
   "bfastpp",
   "bfast01",
   "bfast01classify",
-  "bfastsar"
+  "bfastsar",
   "sarefpts"
 )
 
