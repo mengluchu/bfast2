@@ -15,7 +15,19 @@ export(
   "bfastpp",
   "bfast01",
   "bfast01classify",
-  "bfastsar"
+  "SARefpdents",
+  "getxyMatrix",
+  "changepoint2sp",
+  "pvaluepoint2sp",
+  "gcm",
+  "generatecmchange",
+  "generatecmpvalue",
+  "generateppvalue",
+  "generatepchange",
+  "barplotcm",
+  "generatemapRAS1",
+  "generateRAS",
+  "generatemapGGRASTER"
 )
 
 S3method("plot", "bfast")
