@@ -1,7 +1,8 @@
 #library(devtools)
  
 #install_github("strucchange","mengluchu",build_vignettes = FALSE)
-#load("fevi8.Rdata")
+#install_github("bfast2","mengluchu",build_vignettes = FALSE)
+# load("fevi8.Rdata")
 #library(strucchange)
 #library(spacetime) 
 #library(spdep)
