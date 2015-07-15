@@ -38,9 +38,9 @@ iquery(" store(r_exec( repro1r, 'output_attrs= 8',
        load(\"/home/menglu/listcn636.Rdata\") # neighbor
        
        
-       dim1<-length(unique(the_i)) 
-       dim2<-length(unique(the_j)) 
-       dim3<-length(unique(the_t))
+       dim1<-length(unique(the_i)) #row 
+       dim2<-length(unique(the_j)) #col
+       dim3<-length(unique(the_t)) #time
        tl=1:636
        w=1/46       
        co <- cos(2*pi*tl*w)
@@ -49,8 +49,8 @@ iquery(" store(r_exec( repro1r, 'output_attrs= 8',
        si2 <- sin(2*pi*tl*w*2)    
        co3 <- cos(2*pi*tl*w*3)
        si3 <- sin(2*pi*tl*w*3) 
-       newarray1<-array(evi2,c(636, dim2,dim1))          # scidb array to r array                
-       newarray<-aperm(newarray1, c(2,3,1))
+       newarray1<-array(evi2,c(636, dim1,dim2))          # scidb array to r array                
+       newarray<-aperm(newarray1, c(3,2,1))
        
        fevi3b3<-newarray    
        fevi3b3[is.na(fevi3b3)] <- 0
@@ -62,18 +62,18 @@ iquery(" store(r_exec( repro1r, 'output_attrs= 8',
        
        
        
-       if(dim1<3 || dim2<3)
+       if(dim1<3 || dim2<3)  # side or corner
 {       
        
        if(all(c(dim1==2,dim2 ==2))) # corner
        
 {
-       if(all(c(min(the_i)==0, min(the_j)==0)))
+       if(all(c(min(the_i)==0, min(the_j)==0)))  # upper left
 {
        fevi3b312t1<-ts(fevi3b3[1,1,],start=c(2000,1),frequency=46) # reconstruct the time series with its own
        rcol<-min(the_i)*1.0 
        rrow<-max(the_j)*1.0                 
-}         else if (all(c(min(the_i)==0, min(the_j)>0)))
+}         else if (all(c(min(the_i)==0, min(the_j)>0)))  # bottom left
 {
        fevi3b312t1<-ts(fevi3b3[2,1,],start=c(2000,1),frequency=46) # reconstruct the time series with its own
        rcol<-min(the_i)*1.0 
@@ -85,28 +85,28 @@ iquery(" store(r_exec( repro1r, 'output_attrs= 8',
        rcol<-max(the_i)*1.0 
        rrow<-min(the_j)*1.0                 
 } 
-       else if (all(c(min(the_i)>0,min(the_j)>0)))
+       else if (all(c(min(the_i)>0,min(the_j)>0)))  # bottom right
 {
        fevi3b312t1<-ts(fevi3b3[2,2,],start=c(2000,1),frequency=46) # reconstruct the time series with its own
        rcol<-max(the_i)*1.0 
        rrow<-max(the_j)*1.0                 
 } 
-} else if ( all(c(dim1==3, dim2==2,max(the_j)==1))) # row 1 #dim 1 is actually the length of j # side
+} else if ( all(c(dim1==3, dim2==2,max(the_j)==1))) # row 1 (up) #dim 1 is actually the length of j # side
 {
        fevi3b312t1<-ts(fevi3b3[1,2,],start=c(2000,1),frequency=46) # reconstruct the time series with its own
        rcol<-(min(the_i)+1)*1.0 
        rrow<-min(the_j)*1.0                
-}  else if (all(c( dim1==2, dim2==3  , max(the_i)==1))) #col 1
+}  else if (all(c( dim1==2, dim2==3  , max(the_i)==1))) #col 1 (left)
 {
        fevi3b312t1<-ts(fevi3b3[2,1,],start=c(2000,1),frequency=46) # reconstruct the time series with its own
        rcol<-min(the_i)*1.0 
        rrow<-(min(the_j)+1)*1.0                
-} else if (all(c( dim1==3  , dim2==2  ))) #col 149 # max(the_j)==149 is not needed
+} else if (all(c( dim1==3  , dim2==2  ))) # (down) # max(the_j)==149 is not needed
 {
        fevi3b312t1<-ts(fevi3b3[2,2,],start=c(2000,1),frequency=46) # reconstruct the time series with its own
        rcol<-(min(the_i)+1)*1.0 
        rrow<-max(the_j)*1.0                
-}else if (all(c( dim1==2, dim2==3  ))) #col 1 , max(the_i)==149 
+}else if (all(c( dim1==2, dim2==3  ))) #(right) , max(the_i)==149 
 {
        fevi3b312t1<-ts(fevi3b3[2,2,],start=c(2000,1),frequency=46) # reconstruct the time series with its own
        rcol<-max(the_i)*1.0 
