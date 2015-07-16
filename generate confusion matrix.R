@@ -1,9 +1,9 @@
 #library('rgdal')
 #library('raster')
 
-load('prodespoints00.Rdata') # mask
-load('pdd.Rdata')           # reference data
-groundtruth<-pdd            
+#load('prodespoints00.Rdata') # mask
+#load('pdd.Rdata')           # reference data
+#groundtruth<-pdd            
 #load('tssarar1.Rdata') # corrected st model with original array cusum
 #load('tssarar2.Rdata')#mosum
 #load('tssarar3.Rdata')#sar cusum
@@ -176,11 +176,18 @@ generatepchange<-function( result.array,mask=prodespoints00,reference.sppoints=p
   return(pvpoint)
 }
 
-load('prodespoints00.Rdata') # mask
- load('pdd.Rdata')
- groundtruth<-pdd
-cpe<- generatepchange(edivisive1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359),crs= CRS("+proj=utm +zone=21 +south"))
-cpb<-generatepchange(bfast1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359),crs= CRS("+proj=utm +zone=21 +south"))
+#load('prodespoints00.Rdata') # mask
+ #load('pdd.Rdata')
+ #groundtruth<-pdd
+#cpe2<- generatepchange(edivisive2,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359),crs= CRS("+proj=utm +zone=21 +south"))
+
+#cpe<- generatepchange(edivisive1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359),crs= CRS("+proj=utm +zone=21 +south"))
+#cpb<-generatepchange(bfast1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x=c(58930:59079),y=c(48210:48359),crs= CRS("+proj=utm +zone=21 +south"))
+#
+#cpe2cm<-generatecmchange(result.array=edivisive2 ,reference.sppoints=pdd,mask=prodespoints00,pv=0.05,x=c(58930:59079),y=c(48210:48359))
+#cpe1cm<-generatecmchange(result.array=edivisive1 ,reference.sppoints=pdd,mask=prodespoints00,pv=0.05,x=c(58930:59079),y=c(48210:48359))
+#cpbcm<-generatecmchange(result.array=bfast1 ,reference.sppoints=pdd,mask=prodespoints00,pv=0.05,x=c(58930:59079),y=c(48210:48359))
+#cts<-rbind(cpe2cm, cpe1cm,cpbcm)
 #
 ### do things
 #ptssarar1<-generateppvalue(tssarar1,pv=0.05)
@@ -207,26 +214,32 @@ cpb<-generatepchange(bfast1,mask=prodespoints00,reference.sppoints=pdd,pv=0.05,x
 #names1<-c("OLS-MOSUM p-value: 0.05","AR(1) OLS-MOSUM pvalue: 0.05","SAR OLS-MOSUM p-value: 0.05", "SAR OLS-MOSUM p-value: 0.1","OLS-CUSUM p-value: 0.05","AR(1) OLS-CUSUM p-value: 0.05","SAR OLS-CUSUM p-value: 0.05","SAR OLS-CUSUM p-value: 0.2")
 #tex1='Confusion Matrix of Different Methods'
 
-#par(mfrow=c(1,2))
-#barplot(cts[,1:4]/22500,beside=TRUE, main=tex1,    
-#        legend.text=names1,
-#        
-#        cex.main=1,
-#        font.main=1,
-#        col=bpy.colors(8),
-#        #=rainbow(8,s = 1, v = 1, start = 0.05, end = 0.35),
-#        #legend.text=c("MOSUM","CUSUM","AR(1) MOSUM 0.05","AR(1) CUSUM 0.05","SAR MOSUM 0.05", "SAR MOSUM 0.025","SAR CUSUM 0.05","SAR CUSUM 0.005"),
-#        args.legend = list(x = "topleft", bty = "n",cex=0.8))        
+barplotcm<- function(cts,  names1=c("Ediv dst","ediv","BFAST"),n=8,title="Confusion Matrix")
+{
+par(mfrow=c(1,2))
+barplot(cts[,1:4]/22500,beside=TRUE, main=title,    
+        legend.text=names1,
+        
+        cex.main=1,
+        font.main=1,
+        col=bpy.colors(n),
+        #=rainbow(8,s = 1, v = 1, start = 0.05, end = 0.35),
+        #legend.text=c("MOSUM","CUSUM","AR(1) MOSUM 0.05","AR(1) CUSUM 0.05","SAR MOSUM 0.05", "SAR MOSUM 0.025","SAR CUSUM 0.05","SAR CUSUM 0.005"),
+        args.legend = list(x = "topleft", bty = "n",cex=0.8))        
 
-#barplot(cts[,5],beside=TRUE, main='Pontius Producer\'s Accuracy',     
-#        col=bpy.colors(8),
-#        font.main=1,
-#        cex.main=1,
+ barplot(cts[,5],beside=TRUE, main='Pontius Producer\'s Accuracy',     
+         col=bpy.colors(n),
+         font.main=1,
+         cex.main=1,
         #legend.text=c("MOSUM","CUSUM","SAR MOSUM 0.05", "SAR MOSUM 0.025","SAR CUSUM 0.05","SAR CUSUM 0.005"),
         #args.legend = list(x = "topleft", bty = "n",cex=0.6)) 
-#)
-generatemapRAS1(cpe,groundtruth,prodespoints00)
-generatemapRAS1(cpb,groundtruth,prodespoints00)
+ )
+}
+#barplotcm(cts, n=8)
+#generatemapRAS1(cpe,groundtruth,prodespoints00)
+#generatemapRAS1(cpe2,groundtruth,prodespoints00)
+#generatemapRAS1(cpb,groundtruth,prodespoints00)
+
 generatemapRAS1<-function (pva, groundtruth=groundtruth,prodespoints00=prodespoints00 ) {
 groundtruth<-spTransform(groundtruth,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
 prodespoints00<-spTransform(prodespoints00,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
@@ -272,6 +285,7 @@ ty<-levelplot(raty,col.regions =cols,names.attr=c("edivisive"))
 
 plot(ty)
 }
+#take 1 object for comparison, plot the raster
 generateRAS<-function (pva , groundtruth=groundtruth,prodespoints00=prodespoints00 ) {
   groundtruth<-spTransform(groundtruth,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
   prodespoints00<-spTransform(prodespoints00,CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'))
@@ -315,16 +329,19 @@ generateRAS<-function (pva , groundtruth=groundtruth,prodespoints00=prodespoints
   return(raty)
 
 }
-r1<-generateRAS(pva=cpe,groundtruth,prodespoints00)
-rb<-generateRAS(pva=cpb,groundtruth,prodespoints00)
-rasterStack1 = stack(r1, rb)
-names(rasterStack1) = c("e.divisive", "BFAST" )
+#return the object
+#r1<-generateRAS(pva=cpe,groundtruth,prodespoints00)
+#rb<-generateRAS(pva=cpb,groundtruth,prodespoints00)
+#r2<-generateRAS(pva=cpe2,groundtruth,prodespoints00)
+#rasterStack1 = stack(r1,r2, rb)
+#names(rasterStack1) = c("e.divisive","e.divisive dst", "BFAST" )
 
-l<- levelplot(rasterStack1
-              , pretty=TRUE, margin=F
-              , xlab="Latitude (Sinusoidal Projection)", ylab="Longitude (Sinusoidal Projection)",
-              col.regions=cols,names.attr=c("e.divisive(monthly)", "BFAST (monthly)" ))
-plot(l)
+#l<- levelplot(rasterStack1
+#              , pretty=TRUE, margin=F
+#              , xlab="Latitude (Sinusoidal Projection)", ylab="Longitude (Sinusoidal Projection)",
+#              col.regions=cols,names.attr=c("e.divisive(monthly)", "e.divisive dst(monthly)", "BFAST (monthly)" ))
+#plot(l)
+#take all four 
 generatemapGGRASTER<-function (pva1,pva2,pva3,pva4, groundtruth,titlename='map') 
 {
   pva<-pva1

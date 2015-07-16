@@ -59,9 +59,9 @@ changepoint2sp<- function(changearray,x=c(58930:59079),y=c(48210:48359),crs=CRS(
 ######  array of p-value to spatial points   ####
 pvaluepoint2sp<- function(parray,x=c(58930:59079),y=c(48210:48359),xoff=1,yoff=1,pvalue=0.05,crs=CRS("+proj=utm +zone=21 +south")) #map changes from an array of p-values
 {  
-  
-  change7<-which(parray<pvalue, arr.ind=TRUE) 
-  
+ 
+  change7<-which(parray<pvalue& (parray!=-1) , arr.ind=TRUE) 
+ 
   xct1<-change7[,1]+x[1]-1+xoff # for the second 150 by 150 array
   xct2<-change7[,1] 
   

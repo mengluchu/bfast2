@@ -1,6 +1,6 @@
 
 library(scidb)
-scidbconnect("gis-bigdata.uni-muenster.de", 49972, "menglu", "ms3A5Bfn9PCycMr")
+scidbconnect("server", port, "username", "password")
 ######################################### 
 ######  subset and prepare scidb array ## 
 ######################################### 
@@ -114,7 +114,7 @@ iquery(" store(r_exec( repro1r, 'output_attrs= 8',
 } 
        
        
-       resar1<-coredata(residuals(gls(fevi3b312t1 ~ tl+co+co2+co3+si+si2+si3,correlation=corAR1())))
+       resar1<-coredata(residuals(gls(fevi3b312   t1 ~ tl+co+co2+co3+si+si2+si3,correlation=corAR1())))
        
        p.Vt3 <- sctest(efp(fevi3b312t1 ~  tl+co+co2+co3+si+si2+si3,   h = 0.15, type = \"OLS-CUSUM\" )) 
        p.Vt4 <- sctest(efp(fevi3b312t1 ~  tl+co+co2+co3+si+si2+si3,   h = 0.15, type = \"OLS-MOSUM\" ))
@@ -185,28 +185,26 @@ iquery(" store(r_exec( repro1r, 'output_attrs= 8',
 ######  restore the output array to SciDB array## 
 ################################################# 
 #Restore the dimensions (attribute double to int64, then redimension)
-iquery("store(
-    redimension(
-          project(
-              apply(
+ iquery("store(
+  redimension(
+    project(
+      apply(
         attribute_rename(
-                    project(
-                        unpack(outputsar150, tmpDim), 
-        expr_value_0,expr_value_1,expr_value_2,expr_value_3,expr_value_4,expr_value_5
-       ,expr_value_6,expr_value_7,expr_value_8
-                            ),       
-        expr_value_0, spcu, expr_value_1,spmo, expr_value_2,cu, expr_value_3, mo,
-        expr_value_4,arcu,expr_value_5,armo,expr_value_6,col,expr_value_7,row
-                            ), 
-            col, int64(col), row, int64(row)
-                    ), 
-            spcu,spmo,cu,mo,arcu,armo,col,row 
-                ),
-        <value:double> [i=0:149,3,0,j=0:149,3,0 ]
-              ), resarefpscidb
-            )
-       ");
-
-
+          project(                     
+            unpack(outputsar150, tmpDim) ,
+            expr_value_0,expr_value_1,expr_value_2,expr_value_3,expr_value_4,expr_value_5
+            ,expr_value_6,expr_value_7 
+          ),    
+          expr_value_0, spcu, expr_value_1,spmo, expr_value_2,cu, expr_value_3, mo,
+          expr_value_4,arcu,expr_value_5,armo,expr_value_6,thecol,expr_value_7,therow
+        ), 
+        col1, int64(thecol), row1, int64(therow)
+      ),
+       row1, col1,spcu,spmo,cu,mo,arcu,armo 
+    ),
+    <spcu:double, spmo:double, cu: double,mo:double, arcu:double,armo:double> [row1=0:149,3,0,col1=0:149,3,0 ] 
+  ), resarefpscidb2)",return=TRUE)
+ 
+# mind the name has to match!!
 
 
