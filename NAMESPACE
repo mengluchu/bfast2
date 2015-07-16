@@ -27,7 +27,8 @@ export(
   "barplotcm",
   "generatemapRAS1",
   "generateRAS",
-  "generatemapGGRASTER"
+  "generatemapGGRASTER",
+  "filter.st.median"
 )
 
 S3method("plot", "bfast")
