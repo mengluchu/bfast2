@@ -1,8 +1,9 @@
 filter.st.median<-function(a) #if evi is more than 1 or less than -1, replace with median of its surrounding pixels
 {
+  
   index1<-which(abs(a)>1 || is.na(a),arr.ind=TRUE)
-  
-  
+  if(length(index1) !=0)
+  {  
   for (i1 in (1:dim(index1)[1]))
   {
     
@@ -35,12 +36,18 @@ filter.st.median<-function(a) #if evi is more than 1 or less than -1, replace wi
     if(tl<min(index1[,3]))
       tl=min(index1[,3])
     
-    
-    a[i,j,t]<-median(c(
+    med<-median(c(
       a[ih,j,t],a[il,j,t],a[i,jh,t],a[i,jh,t],
       a[ih,j,tl],a[il,j,tl],a[i,jh,tl],a[i,jh,tl],
       a[ih,j,th],a[il,j,th],a[i,jh,th],a[i,jh,th]))
+  
+    if(abs(med)>1)
+      med=0.47
+  
+    a[i,j,t]<-med
     
+  }
+  
   }
   return(a)   
 }
