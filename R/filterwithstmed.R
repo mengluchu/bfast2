@@ -1,4 +1,4 @@
-filter.st.median<-function(a) #if evi is more than 1 or less than -1, replace with median of its surrounding pixels
+filter.st.median2<-function(a) #if evi is more than 1 or less than -1, replace with median of its surrounding pixels
 {
   index1<-which(abs(a)>1|is.na(a),arr.ind = TRUE)
   if(length(index1) !=0)
