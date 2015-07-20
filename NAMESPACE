@@ -28,7 +28,7 @@ export(
   "generatemapRAS1",
   "generateRAS",
   "generatemapGGRASTER",
-  "filter.st.median"
+  "filter.st.median2"
 )
 
 S3method("plot", "bfast")
