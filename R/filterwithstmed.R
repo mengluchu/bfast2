@@ -40,7 +40,7 @@ filter.st.median2<-function(a) #if evi is more than 1 or less than -1, replace w
       a[ih,j,tl],a[il,j,tl],a[i,jh,tl],a[i,jh,tl],
       a[ih,j,th],a[il,j,th],a[i,jh,th],a[i,jh,th]))
   
-    if(abs(med)>1)
+    if(abs(med)>1|| is.na(med))
       med=0.47
   
     a[i,j,t]<-med
