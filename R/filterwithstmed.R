@@ -49,5 +49,5 @@ filter.st.median<-function(a) #if evi is more than 1 or less than -1, replace wi
   
   }
   return(a)   
-}
+}#
 
