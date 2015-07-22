@@ -1,3 +1,4 @@
+library("devtools")
 install_github("strucchange","mengluchu",build_vignettes = TRUE) # how to build on modified package
 install_github("bfast2","mengluchu",build_vignettes = TRUE)
 library("bfast")
@@ -37,24 +38,24 @@ data(tssarar5)#ar cusum
 data(tssarar6)#ar mosum
 
 length(which(tssarar2s<0.05,arr.ind=TRUE))
-#takes a week to run
+#takes a week to run,checked  
 #tsall<-SARefpdents(inputarray=fevi8, le=636)
-#tssarar1<-tsall[[1]]
-#tssarar2<-tsall[[2]]
-#tssarar3<-tsall[[3]]
-#tssarar4<-tsall[[4]]
-#tssarar5<-tsall[[5]]
-#tssarar6<-tsall[[6]]
+tssarar1<-tsall[[1]]
+tssarar2<-tsall[[2]]
+tssarar3<-tsall[[3]]
+tssarar4<-tsall[[4]]
+tssarar5<-tsall[[5]]
+tssarar6<-tsall[[6]]
  
 groundtruth<-pdd    
-ttssarar1<-generatecmpvalue(tssarar1s,pdd ,pv=0.05) #sarcu
-ttssarar11<-generatecmpvalue(result.array=tssarar1s ,reference.sppoints=pdd ,pv=0.2)
-ttssarar2<-generatecmpvalue(tssarar2s, pdd,pv=0.05) #sarmo
-ttssarar22<-generatecmpvalue(tssarar2s, pdd,pv=0.1) 
-ttssarar3<-generatecmpvalue(tssarar3s, pdd,pv=0.05) #cu
-ttssarar4<-generatecmpvalue(tssarar4s, pdd,pv=0.05) # mo
-ttssarar5<-generatecmpvalue(tssarar5s, pdd,pv=0.05) #arcu
-ttssarar6<-generatecmpvalue(tssarar6s, pdd,pv=0.05) #armo
+ttssarar1<-generatecmpvalue(tssarar1,pdd ,pv=0.05) #sarcu
+ttssarar11<-generatecmpvalue(result.array=tssarar1 ,reference.sppoints=pdd ,pv=0.2)
+ttssarar2<-generatecmpvalue(tssarar2, pdd,pv=0.05) #sarmo
+ttssarar22<-generatecmpvalue(tssarar2, pdd,pv=0.1) 
+ttssarar3<-generatecmpvalue(tssarar3, pdd,pv=0.05) #cu
+ttssarar4<-generatecmpvalue(tssarar4, pdd,pv=0.05) # mo
+ttssarar5<-generatecmpvalue(tssarar5, pdd,pv=0.05) #arcu
+ttssarar6<-generatecmpvalue(tssarar6, pdd,pv=0.05) #armo
 
 
 
