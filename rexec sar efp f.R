@@ -51,15 +51,16 @@ iquery("  store(r_exec( repro1r, 'output_attrs= 8',
        co3 <- cos(2*pi*tl*w*3)
        si3 <- sin(2*pi*tl*w*3) 
        newarray1<-array(evi2,c(636, dim2,dim1))          # scidb array to r array                
-       newarray<-aperm(newarray1, c(2,3,1))
+       newarray<-aperm(newarray1, c(3,2,1))
       
        fevi3b3<-filter.st.median2(newarray)  
-       fevi3b3[is.na(fevi3b3)] <- 0
-       fevi3b3[fevi3b3>1]<- median(fevi3b3) 
-       fevi3b3[fevi3b3<-1]<- median(fevi3b3)
+      
+       #fevi3b3[is.na(fevi3b3)] <- 0
+       #fevi3b3[fevi3b3>1]<- median(fevi3b3) 
+       #fevi3b3[fevi3b3<-1]<- median(fevi3b3)
        #aa2<-as.vector(fevi3b3)
        #aa2[aa2==0]<-NA
-       fevi3b3[fevi3b3==0]<- median(fevi3b3)    
+       #fevi3b3[fevi3b3==0]<- median(fevi3b3)    
        
        
        
@@ -181,18 +182,18 @@ iquery("  store(r_exec( repro1r, 'output_attrs= 8',
  
 #spcusum1, spmosum1,cusum1,mosum1,cusumar1,mosumar1,rcol,rrow
 
-  iquery("scan(outputsar150f)",return=TRUE,n=10)
+#  iquery("show(resarefpscidbf2)",return=TRUE,n=10)
 ################################################# 
 ######  restore the output array to SciDB array## 
 ################################################# 
 #Restore the dimensions (attribute double to int64, then redimension)
  iquery("store(
   redimension(
-    project(
+  subarray(  project(
       apply(
         attribute_rename(
           project(                     
-            unpack(outputsar150f, tmpDim) ,
+            unpack(outputsar150f2, tmpDim) ,
             expr_value_0,expr_value_1,expr_value_2,expr_value_3,expr_value_4,expr_value_5
             ,expr_value_6,expr_value_7 
           ),    
@@ -202,10 +203,44 @@ iquery("  store(r_exec( repro1r, 'output_attrs= 8',
         col1, int64(thecol), row1, int64(therow)
       ),
        col1,row1, spcu,spmo,cu,mo,arcu,armo 
-    ),
+    ), 0,22499),
     <spcu:double, spmo:double, cu: double,mo:double, arcu:double,armo:double> [col1=0:149,3,0, row1=0:149,3,0] 
-  ), resarefpscidbf)",return=TRUE)
- 
+  ), resarefpscidbf03)",return=TRUE)
+
+#iquery("dimensions(resarefpscidbf02)",return=TRUE)
 # mind the name has to match!!
 
 #resarefpscidb2
+#iquery("store(
+ 
+#    project(
+#      apply(
+#        attribute_rename(
+#          project(                     
+#            unpack(outputsar150f2, tmpDim) ,
+#            expr_value_0,expr_value_1,expr_value_2,expr_value_3,expr_value_4,expr_value_5
+#            ,expr_value_6,expr_value_7 
+#          ),    
+#          expr_value_0, spcu, expr_value_1,spmo, expr_value_2,cu, expr_value_3, mo,
+#          expr_value_4,arcu,expr_value_5,armo,expr_value_6,thecol,expr_value_7,therow
+ #       ), 
+#        col1, int64(thecol), row1, int64(therow)
+#      ),
+#       col1,row1, spcu,spmo,cu,mo,arcu,armo 
+#    ), resarefpscidbf2t)",return=TRUE)
+#iquery("dimensions(resarefpscidbf2t)",return=TRUE)
+#r1<-scidb("resarefpscidbf2t")
+#summary(r1[])
+#x1<-r1[]$row1
+#y1<-r1[]$col1
+#v1<-r1[]$mo
+#t1<-data.frame(cbind(x1,y1,v1))
+
+#coordinates(t1)<-~x1+y1
+#t11<-raster(t1)
+#t2<-  subset(t1,t1["v1"]<0.05,select = c(1, 2,3))
+#par(mfrow=c(1,2))
+#spplot(t2)
+#spplot(raster(tssarar4)<0.05)
+# gridded(t1)<-TRUE
+#spplot(raster(t1)<0.05)
