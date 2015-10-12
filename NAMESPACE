@@ -28,7 +28,15 @@ export(
   "generatemapRAS1",
   "generateRAS",
   "generatemapGGRASTER",
-  "filter.st.median2"
+  "filter.st.median2",
+  "arraytoSTFDF2",
+  "deterpolytopointstoSTSDF",
+  "changearraytoSTSDF",
+  "waystfdf2stsdf",
+  "polygontopoint",
+  "hexspt",
+  "comparetime",
+  "plottimediff"
 )
 
 S3method("plot", "bfast")
