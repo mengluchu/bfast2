@@ -1,14 +1,42 @@
-getxyMatrix <- function(colrowid.Matrix, pixelSize){
-  #Returns the coords (MODIS synusoidal) of the center of the given pixel
-  #SR-ORG:6974
-  x <- vector(mode = "numeric", length = length(nrow(colrowid.Matrix)))
-  y <- vector(mode = "numeric", length = length(nrow(colrowid.Matrix)))
-  corner.ul.x <- -20015109.354
-  corner.ul.y <- 10007554.677
-  x <- corner.ul.x + (pixelSize/2) + (colrowid.Matrix[,1] * pixelSize)
-  y <- corner.ul.y - (pixelSize/2) - (colrowid.Matrix[,2] * pixelSize)
+#1) STFDF:  covert array to stsdf: 
+#2) STSDF:  array store the change point
+#           deter spatial polygon list; prodes spatial polygon list
+#3) way 1:  manually build spatial and temporal index
+#4) way 2:  convert from array to STFDF, then to STIDF, then to STSDF (from STIDF to STSDF the endtime is by default)
+#5) polygontopoint:           rasterize polygons to spatialpoint
+
+# arraytoSTFDF2 :           1)
+# deterpolytopointstoSTSDF  2) 3)
+# changearraytoSTSDF:       2) 3)
+# waystfdf2stsdf:           4)
+
+#hexspt comparetime plottimediff
+
+arraytoSTFDF2<-function(array,attr.name="value", alltime=bt, x=c(58930:59079),y=c(48210:48359),crs,months=0.3)
+{
   
-  cbind(x,y)
+  t<-c(1:dim(array)[3])
+  tt2<-unique(as.POSIXct(alltime[t]))  # array index to time
+  y1<-rep(y,each=length(x))
+  x1<-rep(x,length(y))
+  xyd<-as.data.frame(cbind(x1,y1))
+  xyc<-getxyMatrix(xyd,231.6564)
+  xyc<-as.data.frame(xyc)
+  
+  names(xyc)<-c("x","y")
+  coordinates(xyc)<-~x+y
+  proj4string(xyc)<-crs
+  
+  data2<-as.vector(array) 
+  
+  data2<-  data.frame(data2)
+  if(months!=0){
+    ltime<-  tt2+months*3600*24*30
+    etime<-  tt2-months*3600*24*30
+    
+    stfdf1<-STFDF(xyc, etime, data2,ltime) }else{ 
+      stfdf1<-STFDF(xyc, tt2, data2 )  }
+  return(stfdf1)
 }
 
 polygontopoint<-function(x=c(58930:59079),y=c(48210:48359),sppolygon,crs=MODISCRS) {
@@ -65,35 +93,6 @@ deterpolytopointstoSTSDF<-function(tdall2=tdall,pp01=pp0,rpp2=rpp, crs=MODISCRS,
   
   return(stsdf2)
 }
-
-
-arraytoSTFDF2<-function(array,attr.name="value", alltime=bt, x=c(58930:59079),y=c(48210:48359),crs,months=0.3)
-{
-  
-  t<-c(1:dim(array)[3])
-  tt2<-unique(as.POSIXct(alltime[t]))  # array index to time
-  y1<-rep(y,each=length(x))
-  x1<-rep(x,length(y))
-  xyd<-as.data.frame(cbind(x1,y1))
-  xyc<-getxyMatrix(xyd,231.6564)
-  xyc<-as.data.frame(xyc)
-  
-  names(xyc)<-c("x","y")
-  coordinates(xyc)<-~x+y
-  proj4string(xyc)<-crs
-  
-  data2<-as.vector(array) 
-  
-  data2<-  data.frame(data2)
-  if(months!=0){
-    ltime<-  tt2+months*3600*24*30
-    etime<-  tt2-months*3600*24*30
-    
-    stfdf1<-STFDF(xyc, etime, data2,ltime) }else{ 
-      stfdf1<-STFDF(xyc, tt2, data2 )  }
-  return(stfdf1)
-}
-
 
 changearraytoSTSDF<-function(array,crs,attr.name="value", alltime=bt, x=c(58930:59079),y=c(48210:48359),months=6)
 {
@@ -159,7 +158,6 @@ changearraytoSTSDF<-function(array,crs,attr.name="value", alltime=bt, x=c(58930:
   stsdf1<-STSDF(spxyc, etime,index=index1,data2,ltime) 
   return(stsdf1)
 } 
-
 
 #not so computationally efficient, but easiest way, pay attention to the x and y sequence
 waystfdf2stsdf<-function(data=t3darrbfamul2, alltime=bt,x=c(58930:59079),y=c(48210:48359),crs=MODISCRS,months=0.3)  

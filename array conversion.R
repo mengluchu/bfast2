@@ -1,27 +1,49 @@
  
 #save(bt,file='bt.Rdata')
-#library("intervals")
-#load("SpatialPolygons.R")
-#load("tdall2.Rdata")
-#load("pp0.Rdata")
-#load("rpp.Rdata")
-#load("xyc.Rdata") # whole 22500 points
-#load("bt.Rdata")
-#load('C:/Users/m_lu0002/Dropbox/mengluchu/bfast2/bt.Rdata')
-#load("C:/Users/m_lu0002/Dropbox/mengluchu/bfast2/t3darrbfamul2.Rdata")
-#MODISCRS<-'+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'
-#UTM21S<-"+proj=utm +zone=21 +south"
+library("intervals")
+library("spacetime")
+library("rgdal")
+library("hexbin")
+load("/Users/lumeng/Dropbox/mengluchu/bfast/SpatialPolygons.R")
+load("/Users/lumeng/Dropbox/mengluchu/bfast/tdall2.Rdata")
+load("C:/Users/m_lu0002/Dropbox/mengluchu/bfast/pp0.Rdata")
+load("C:/Users/m_lu0002/Dropbox/mengluchu/bfast/rpp.Rdata")
+load("C:/Users/m_lu0002/Dropbox/mengluchu/bfast/xyc.Rdata") # whole 22500 points
+#prodespoints00<- spTransform(prodespoints00,MODISCRS)
+load('C:/Users/m_lu0002/Dropbox/mengluchu/bfast2/bt.Rdata')
+load("C:/Users/m_lu0002/Dropbox/mengluchu/bfast2/t3darrbfamul2.Rdata")
+load("C:/Users/m_lu0002/Dropbox/mengluchu/bfast/edivisive1.Rdata")
+load("C:/Users/m_lu0002/Dropbox/mengluchu/bfast/edivisive2.Rdata")
+load("/Users/lumeng/Dropbox/mengluchu/bfast/bfast1.Rdata")
+load("/Users/lumeng/Dropbox/mengluchu/bfast/edivisive1.Rdata")
+load("/Users/lumeng/Dropbox/mengluchu/bfast2/t3darrbfamul2.Rdata")
+load("/Users/lumeng/Dropbox/mengluchu/bfast/bfast1.Rdata")
 
-#SpatialPolygon<-spatialPolygons 
-#tdall<-tdall2
+MODISCRS<-'+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'
+UTM21S<-"+proj=utm +zone=21 +south"
+
+SpatialPolygon<-spatialPolygons 
+tdall<-tdall2
 #########################################################################################
-#changepoint2<-waystfdf2stsdf(t3darrbfamul2, alltime=bt,x=c(58930:59079),y=c(48210:48359),MODISCRS,months=0.3)  
-#deterpoinf<-deterpolytopointstoSTSDF(tdall ,pp01=pp0,rpp2=rpp,crs=MODISCRS,months=0.1)
-#changests<-changearraytoSTSDF(t3darrbfamul2, alltime=bt, x=c(58930:59079),y=c(48210:48359),MODISCRS,months=0.3)
+changepoint2<-waystfdf2stsdf(t3darrbfamul2, alltime=bt,x=c(58930:59079),y=c(48210:48359),MODISCRS,months=0.0003)  
+deterpoinf<-deterpolytopointstoSTSDF(tdall ,pp01=pp0,rpp2=rpp,crs=MODISCRS,months=0)
+changests<-changearraytoSTSDF(t3darrbfamul2, alltime=bt, x=c(58930:59079),y=c(48210:48359),MODISCRS,months=0.3)
+ deterpoinf[,1:2]
+str(deterpoinf)
 #
-#ini<- comparetime(sts1=changests,sts2=deterpoinf)
-#ab<-plottimediff(timedf=ini, xlab="BFAST",ylab="DETER",bufferdays1=150,bufferdays2=1)
+stfdfedivi<-changearraytoSTSDF(edivisive2bands, alltime=bt, x=c(58930:59079),y=c(48210:48359),MODISCRS,months=0.3)
+ 
+stfdfedividst<-changearraytoSTSDF(edivisive2, alltime=bt, x=c(58930:59079),y=c(48210:48359),MODISCRS,months=0.3)
+
+plottimediff(stfdfedividst,stfdfedivi,timedf=ini, 
+             xlab="e-div-dst",ylab="e-divisive",title="Edivi.dst vs. edivisive", bufferdays1=150,bufferdays2=1)
+plottimediff(stfdfedividst,changests,timedf=ini, 
+             xlab="e-div-dst",ylab="bfast",title="Edivi.dst vs. bfast", bufferdays1=150,bufferdays2=1)
+
+#plot(changests)
 #plot(ab[[1]])
+
+save(changepoint2,file="changepoint2.Rdata") # change array to stsdf
 ########################################################################################
 
 ##
@@ -44,6 +66,18 @@
 
 #save(pp0,file="pp0.Rdata") # deter points
 #save(rpp,file="rpp.Rdata") #repeating
+getxyMatrix <- function(colrowid.Matrix, pixelSize){
+  #Returns the coords (MODIS synusoidal) of the center of the given pixel
+  #SR-ORG:6974
+  x <- vector(mode = "numeric", length = length(nrow(colrowid.Matrix)))
+  y <- vector(mode = "numeric", length = length(nrow(colrowid.Matrix)))
+  corner.ul.x <- -20015109.354
+  corner.ul.y <- 10007554.677
+  x <- corner.ul.x + (pixelSize/2) + (colrowid.Matrix[,1] * pixelSize)
+  y <- corner.ul.y - (pixelSize/2) - (colrowid.Matrix[,2] * pixelSize)
+  
+  cbind(x,y)
+}
 
 polygontopoint<-function(x=c(58930:59079),y=c(48210:48359),sppolygon,crs=MODISCRS) {
   #sppolygon<-prodes67808
@@ -91,7 +125,7 @@ deterpolytopointstoSTSDF<-function(tdall2=tdall,pp01=pp0,rpp2=rpp, crs=MODISCRS,
   names( data2)<-attr.name
   proj4string(pp01)<-CRS('+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs')
   
-  ltime<-  tt2+months*3600*24*30
+  ltime<- tt2+months*3600*24*30 
   etime<- tt2-months*3600*24*30
   stsdf2<-STSDF(pp01,etime,index=index1,data2,ltime ) 
   
@@ -100,8 +134,10 @@ deterpolytopointstoSTSDF<-function(tdall2=tdall,pp01=pp0,rpp2=rpp, crs=MODISCRS,
   return(stsdf2)
 }
 
-arraytoSTFDF2<-function(array,crs,attr.name="value", alltime=bt, x=c(58930:59079),y=c(48210:48359),months=0.3)
+
+arraytoSTFDF2<-function(array,attr.name="value", alltime=bt, x=c(58930:59079),y=c(48210:48359),crs,months=0.3)
 {
+  
   t<-c(1:dim(array)[3])
   tt2<-unique(as.POSIXct(alltime[t]))  # array index to time
   y1<-rep(y,each=length(x))
@@ -117,9 +153,12 @@ arraytoSTFDF2<-function(array,crs,attr.name="value", alltime=bt, x=c(58930:59079
   data2<-as.vector(array) 
   
   data2<-  data.frame(data2)
+  if(months!=0){
   ltime<-  tt2+months*3600*24*30
   etime<-  tt2-months*3600*24*30
-  stfdf1<-STFDF(xyc, etime, data2,ltime) 
+  
+  stfdf1<-STFDF(xyc, etime, data2,ltime) }else{ 
+    stfdf1<-STFDF(xyc, tt2, data2 )  }
   return(stfdf1)
 }
 
@@ -199,9 +238,9 @@ changearraytoSTSDF<-function(array,crs,attr.name="value", alltime=bt, x=c(58930:
 
 
 #not so computationally efficient, but easiest way, pay attention to the x and y sequence
-waystfdf2stsdf<-function(t3darrbfamul2, alltime=bt,x=c(58930:59079),y=c(48210:48359),MODISCRS,months=0.3)  
+waystfdf2stsdf<-function(data=t3darrbfamul2, alltime=bt,x=c(58930:59079),y=c(48210:48359),crs=MODISCRS,months=0.3)  
 {
-  changestfdf<-arraytoSTFDF2(t3darrbfamul2, alltime=bt,x=c(58930:59079),y=c(48210:48359),MODISCRS,months=0.3)   #change array, points
+  changestfdf<-arraytoSTFDF2(array=data, alltime=alltime,x=x,y=y,crs=crs,months=months)   #change array, points
   #which(!is.na(edivisive1[,,1:160]),arr.ind=TRUE)
   stsdfchangepoints1<-as(changestfdf,"STIDF")
   stsdfchangepoints2<-as(stsdfchangepoints1,"STSDF")
@@ -253,7 +292,7 @@ hexspt<-function(stdf,name)
   #dev.off()
 }
 
-comparetime<-function(sts1=changests,sts2=deterpoinf)
+comparetime<-function(sts1=changests,sts2=deterpoinf  )
 {
   x<-geometry(sts1) #bfast
   y<-geometry(sts2) #2125 deter points
@@ -290,9 +329,39 @@ comparetime<-function(sts1=changests,sts2=deterpoinf)
 }
 
 
-plottimediff<-function(timedf=ini, xlab="BFAST",ylab="DETER",bufferdays1=150,bufferdays2=1,i=1)
+plottimediff<-function(sts1=changests,sts2=deterpoinf , timedf=ini, xlab="BFAST",ylab="DETER",title, bufferdays1=150,bufferdays2=1 )
 { 
-  ini<- comparetime(sts1=changests,sts2=deterpoinf)
+  x<-geometry(sts1) #bfast
+  y<-geometry(sts2) #2125 deter points
+  
+  xspin<-na.omit(over(y@sp,x@sp)) #bfast in deter 1040 y@sp[x@sp,] more than 873 because deter points are replicated
+  
+  #xspin1<-x@index[,1][xspin] # index in x
+  #length(unique(xspin)) is the same as the length of yspin 
+  bfastindeter<-x[xspin,]
+  
+  yspin<-na.omit(over(x@sp,y@sp)) # deter in bfast  (more replicated points?) 1370 # 873?
+  deterinbfast<-y[yspin,]
+  #yspin1<-y@index[,1][yspin]
+  #plot(x@sp[y@sp,],col='skyblue') # mind they are not the same since there are duplicated spatial points # 1370
+  #points(y@sp[x@sp,],col='pink') # 1040
+  #table(over(y@sp[x@sp,], x@sp[y@sp,]))
+  
+  deterinbfastspid<-over(bfastindeter@sp, deterinbfast@sp)
+  bfastindeterspid<-over(deterinbfast@sp,bfastindeter@sp)
+  
+  
+  lt1<-c()
+  lt2<-c()
+  ini<-array(c(0,0),c(1,2))
+  for (i in 1:length(deterinbfastspid))
+  {
+    lt1[i]<-length(time(deterinbfast[deterinbfastspid[i], ] ))
+    lt2[i]<-length(time(bfastindeter[i, ] ))
+    ini<-  rbind(ini, cbind(as.integer( time(deterinbfast[deterinbfastspid[i], ] ))
+                            ,as.integer( time(bfastindeter[i, ]))))
+  }
+  ini<-ini[-1,]
   t1<-as.POSIXct(ini[,1],origin='1970-01-01') #deter 
   t2<-as.POSIXct(ini[,2],origin='1970-01-01') #bfast        
   t22<-t2-3600*24*bufferdays1
@@ -311,14 +380,14 @@ plottimediff<-function(timedf=ini, xlab="BFAST",ylab="DETER",bufferdays1=150,buf
   
   #jpeg(paste( i,"bfasttime vs dtertime.jpg "), height=4, width=7, res=400,unit="in")
   
-  a<- hexbinplot(ini[,1]~ini[,2],xlab='EDIVISIVE', ylab='BFAST',aspect = 1
+  a<- hexbinplot(ini[,1]~ini[,2],xlab=xlab, ylab=ylab,aspect = 1
                  ,xlim=c(minini,maxini+30000000) ,style='nested.centroids',
-                 ylim =c(minini,maxini+30000000),main='EDIVISIVE TIME VS. BFAST TIME',
+                 ylim =c(minini,maxini+30000000),main=title,
   )
   
-  hexVP.abline(hvp,a=0,b=1,col='orange')
-  hexVP.abline(hvp2,a=0,b=1,col='red')
-  hexVP.abline(hvp3,a=0,b=1,col='skyblue')
+ # hexVP.abline(hvp,a=0,b=1,col='orange')
+#  hexVP.abline(hvp2,a=0,b=1,col='red')
+ # hexVP.abline(hvp3,a=0,b=1,col='skyblue')
   #legend("bottomright",c("bfast a year earlier", 
   #                 "bfast same as deter","bfast a year later"),
   #       col=c("red","orange","skyblue"),pch=1)
@@ -347,7 +416,7 @@ plottimediff<-function(timedf=ini, xlab="BFAST",ylab="DETER",bufferdays1=150,buf
   return(list(a,lenofover))
   
 }
-#comparetime(sts1=changests,sts2=deterpoinf,bufferdays1=150,bufferdays2=1)
-
+#comparetime(sts1=changests,sts2=deterpoinf)
+ 
 #sum(lt2) #total bfast points 1370 
 #deterinbfast<-y[yspin ,]  # ? why the end time is wrong
