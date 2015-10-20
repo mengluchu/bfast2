@@ -1,4 +1,4 @@
-import("graphics", "stats", "zoo", "raster", "sp", "forecast","spdep")
+import("graphics", "stats", "strucchange", "zoo", "raster", "sp", "forecast","spdep")
 
 export(
   "bfaarray2",
